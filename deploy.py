@@ -1,23 +1,37 @@
-from flask import Flask, render_template, request
-import pickle
+from flask import Flask, request, render_template
+import numpy as np
+from sklearn.preprocessing import StandardScaler
+import joblib as joblib
+import os
+
+model = joblib.load('saved_iris_model1.pkl')
+scaler = joblib.load('scaler.save')
 
 app = Flask(__name__)
-#load the model
-model = pickle.load(open('saved_iris_model1.pkl', 'rb'))
+
+IMG_FOLDER = os.path.join('static', 'IMG')
+app.config['UPLOAD_FOLDER'] = IMG_FOLDER
+
 
 @app.route('/')
+def index():
+    return render_template('index.html')
+
+
+@app.route('/', methods=['GET', 'POST'])
 def home():
-    result = ''
-    return render_template('index.html', **locals())
+    if request.method == 'POST':
+        sl = request.form['SepalLengthCm']
+        sw = request.form['SepalWidthCm']
+        pl = request.form['PetalLengthCm']
+        pw = request.form['PetalWidthCm']
+        data = np.array([[sl, sw, pl, pw]], dtype=float)
+        x = scaler.transform(data)
+        prediction = model.predict(x)
+        image = prediction[0] + '.png'
+        image = os.path.join(app.config['UPLOAD_FOLDER'], image)
+        return render_template('index.html', prediction=prediction[0], image=image)
+    return render_template('index.html')
 
-@app.route('/predict', methods=['POST', 'GET'])
-def predict():
-    SepalLengthCm = float(request.form['SepalLengthCm'])
-    SepalWidthCm = float(request.form['SepalWidthCm'])
-    PetalLengthCm = float(request.form['PetalLengthCm'])
-    PetalWidthCm = float(request.form['PetalWidthCm'])
-    result = model.predict([[SepalLengthCm, SepalWidthCm, PetalLengthCm, PetalWidthCm ]])
-    return render_template('index.html', **locals())
-
-if __name__ == "__main__":
-    app.run(debug=True)
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=8080)
