@@ -3,7 +3,7 @@ scikit-learn==1.0.2
 flask==2.2.5
 blinker==1.6.2
 click==8.1.4
-coloroma==0.4.6
+colorama==0.4.6
 gunicorn==21.2.0
 itsdangerous==2.1.2
 Jinja2==3.1.2
