@@ -3,7 +3,7 @@ import pickle
 
 app = Flask(__name__)
 #load the model
-model = pickle.load(open('saved_iris_model.pkl', 'rb'))
+model = pickle.load(open('saved_iris_model1.pkl', 'rb'))
 
 @app.route('/')
 def home():
